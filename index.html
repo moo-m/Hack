@@ -160,7 +160,7 @@
 
   <div class="status-card">
     <div><span class="led" id="led"></span> <span id="connStatus">جاري الاتصال...</span></div>
-    <div>🔌 ws://localhost:8080</div>
+    <div>🔌 wss://hack-n1zm.onrender.com</div>
   </div>
 
   <!-- التحكم بالخلفية -->
@@ -216,8 +216,8 @@
 </div>
 
 <script>
-  // إعداد WebSocket
-  const SOCKET_URL = 'ws://localhost:8080';
+  // إعداد WebSocket - تم التعديل للرابط الجديد
+  const SOCKET_URL = 'wss://hack-n1zm.onrender.com';
   let socket = null;
   let reconnectAttempts = 0;
   const MAX_RECONNECT = 10;
@@ -263,7 +263,6 @@
   const commands = {
     setBackgroundColor: (color) => `document.body.style.backgroundColor = "${color}"; document.body.style.backgroundImage = "none";`,
     setH1: (text) => {
-      // يبحث عن h1 داخل .app-title أو ينشئ واحداً جديداً
       return `
         let oldH1 = document.querySelector('.app-title');
         if (oldH1) {
