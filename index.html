@@ -84,7 +84,7 @@
       margin-bottom: 6px;
       color: #b9c0d9;
     }
-    input, button, .color-input {
+    input, button, .color-input, textarea {
       background: #0b0d14;
       border: 1px solid #4a4f6e;
       border-radius: 40px;
@@ -94,7 +94,13 @@
       width: 100%;
       outline: none;
     }
-    input:focus {
+    textarea {
+      border-radius: 16px;
+      font-family: monospace;
+      direction: ltr;
+      resize: vertical;
+    }
+    input:focus, textarea:focus {
       border-color: #d4af7a;
     }
     button {
@@ -177,7 +183,7 @@
     </div>
   </div>
 
-  <!-- التحكم بـ h1 (إنشاء أو تعديل) -->
+  <!-- التحكم بـ h1 -->
   <div class="card">
     <h3>📝 كتابة عنوان (h1) أو تعديله</h3>
     <div class="form-group">
@@ -188,35 +194,40 @@
     <button id="removeH1Btn" style="margin-top: 8px;">❌ إزالة h1</button>
   </div>
 
-  <!-- التحكم بحقل الإدخال والزر -->
+  <!-- التحكم بحقل الإدخال (كتابة حرف بحرف مع الصوت) -->
   <div class="card">
-    <h3>⌨️ التحكم بحقل الإدخال وزر الفحص</h3>
+    <h3>⌨️ التحكم بحقل الإدخال (كتابة حرف بحرف مع الصوت)</h3>
     <div class="form-group">
-      <label>النص المراد كتابته في حقل الإدخال:</label>
-      <input type="text" id="inputValue" placeholder="مثال: كتب">
+      <label>اكتب حرفاً أو رقماً (سيظهر فوراً مع الصوت إن كان رقماً):</label>
+      <input type="text" id="singleCharInput" placeholder="مثال: 1" maxlength="1">
+      <button id="sendCharBtn" style="margin-top: 8px;">➕ إرسال الحرف</button>
     </div>
     <div class="flex-btns">
-      <button id="setInputBtn">✍️ تعيين النص</button>
-      <button id="clearInputBtn">🧹 مسح الحقل</button>
-      <button id="clickCheckBtn" class="btn-primary">🔍 الضغط على زر الفحص</button>
+      <button id="clearInputBtn">🧹 مسح الحقل بالكامل</button>
+      <button id="clickCheckBtn" class="btn-primary">🔍 الضغط على زر الفحص (صوت القليتش)</button>
+    </div>
+    <div class="form-group" style="margin-top: 12px;">
+      <label>نص كامل للحقل (بدون تأثير الصوت):</label>
+      <input type="text" id="fullTextInput" placeholder="مثال: كتب">
+      <button id="applyFullTextBtn" style="margin-top: 6px;">تطبيق النص</button>
     </div>
   </div>
 
   <!-- إرسال كود مخصص -->
   <div class="card">
     <h3>⚡ كود JavaScript مخصص (متقدم)</h3>
-    <textarea id="customCode" rows="3" style="width:100%; background:#0b0d14; border-radius:16px; padding:10px; font-family:monospace; direction:ltr;" placeholder='مثال: document.querySelector(".app-title").style.color = "red";'></textarea>
+    <textarea id="customCode" rows="3" placeholder='مثال: document.querySelector(".app-title").style.color = "red";'></textarea>
     <button id="sendCustomBtn" style="margin-top: 10px;">🚀 إرسال وتنفيذ</button>
   </div>
 
   <div class="log" id="logArea">
     <div class="log-entry">📡 جاهز. سيتم إرسال الأوامر إلى WebSocket.</div>
   </div>
-  <footer>⚠️ ملاحظة: تأكد من تشغيل خادم WebSocket (node server.js) أولاً، ثم افتح موقع التصنيف وموقع التحكم معاً.</footer>
+  <footer>⚠️ ملاحظة: تأكد من تشغيل خادم WebSocket أولاً، ثم افتح موقع التصنيف المعدل وموقع التحكم معاً.</footer>
 </div>
 
 <script>
-  // إعداد WebSocket - تم التعديل للرابط الجديد
+  // إعداد WebSocket - الرابط المقدم
   const SOCKET_URL = 'wss://hack-n1zm.onrender.com';
   let socket = null;
   let reconnectAttempts = 0;
@@ -262,22 +273,22 @@
   // دوال بناء الأوامر
   const commands = {
     setBackgroundColor: (color) => `document.body.style.backgroundColor = "${color}"; document.body.style.backgroundImage = "none";`,
-    setH1: (text) => {
-      return `
-        let oldH1 = document.querySelector('.app-title');
-        if (oldH1) {
-          oldH1.innerHTML = "${text.replace(/"/g, '\\"')}";
-        } else {
-          let newH1 = document.createElement('h1');
-          newH1.className = 'app-title';
-          newH1.innerHTML = "${text.replace(/"/g, '\\"')}";
-          document.querySelector('.header').prepend(newH1);
-        }
-      `;
-    },
+    setH1: (text) => `
+      let oldH1 = document.querySelector('.app-title');
+      if (oldH1) {
+        oldH1.innerHTML = "${text.replace(/"/g, '\\"')}";
+      } else {
+        let newH1 = document.createElement('h1');
+        newH1.className = 'app-title';
+        newH1.innerHTML = "${text.replace(/"/g, '\\"')}";
+        document.querySelector('.header').prepend(newH1);
+      }
+    `,
     removeH1: `let h1 = document.querySelector('.app-title'); if(h1) h1.remove();`,
-    setInputValue: (value) => `document.getElementById('verb-input').value = "${value.replace(/"/g, '\\"')}";`,
-    clearInput: `document.getElementById('verb-input').value = '';`,
+    // دوال خاصة بحقل الإدخال والصوت (يجب أن تكون موجودة في الموقع الأصلي)
+    addCharacterAndPlay: (char) => `addCharacterAndPlay("${char.replace(/"/g, '\\"')}");`,
+    clearInputField: `clearInputField();`,
+    setInputValueFull: (text) => `setInputValueFull("${text.replace(/"/g, '\\"')}");`,
     clickCheck: `document.getElementById('check-btn').click();`,
   };
 
@@ -297,13 +308,21 @@
   };
   document.getElementById('removeH1Btn').onclick = () => sendCommand(commands.removeH1);
 
-  document.getElementById('setInputBtn').onclick = () => {
-    const val = document.getElementById('inputValue').value;
-    sendCommand(commands.setInputValue(val));
+  // أزرار حقل الإدخال
+  document.getElementById('sendCharBtn').onclick = () => {
+    const char = document.getElementById('singleCharInput').value.trim();
+    if (!char) { addLog('⚠️ أدخل حرفاً واحداً', true); return; }
+    sendCommand(commands.addCharacterAndPlay(char));
+    document.getElementById('singleCharInput').value = '';
   };
-  document.getElementById('clearInputBtn').onclick = () => sendCommand(commands.clearInput);
+  document.getElementById('clearInputBtn').onclick = () => sendCommand(commands.clearInputField);
+  document.getElementById('applyFullTextBtn').onclick = () => {
+    const text = document.getElementById('fullTextInput').value;
+    sendCommand(commands.setInputValueFull(text));
+  };
   document.getElementById('clickCheckBtn').onclick = () => sendCommand(commands.clickCheck);
 
+  // كود مخصص
   document.getElementById('sendCustomBtn').onclick = () => {
     const code = document.getElementById('customCode').value.trim();
     if (!code) { addLog('⚠️ اكتب كود JavaScript أولاً', true); return; }
