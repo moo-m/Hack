@@ -3,231 +3,273 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎮 لوحة التحكم عن بُعد – WebSocket Commander</title>
+  <title>🔓 HACK CONTROLLER | Target: Verb Classifier</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
+
     body {
-      background: linear-gradient(145deg, #1a1e2c 0%, #0b0d17 100%);
-      font-family: 'Segoe UI', 'Cairo', system-ui, sans-serif;
-      padding: 2rem;
+      background: radial-gradient(circle at 20% 30%, #0a0f0a, #030603);
+      font-family: 'Courier New', 'Cairo', monospace;
+      padding: 20px;
       min-height: 100vh;
-      color: #f0f0f0;
+      color: #0f0;
+      direction: ltr;
     }
+
+    /* تأثير الشاشة المصفوفة */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: repeating-linear-gradient(0deg, rgba(0,255,0,0.03) 0px, rgba(0,255,0,0.03) 2px, transparent 2px, transparent 6px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
     .container {
-      max-width: 800px;
+      max-width: 1000px;
       margin: 0 auto;
+      position: relative;
+      z-index: 2;
     }
-    h1 {
-      font-size: 2rem;
-      background: linear-gradient(135deg, #d4af7a, #f5e7c8);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
+
+    .hacker-header {
       text-align: center;
-      margin-bottom: 0.5rem;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #0f0;
+      padding-bottom: 10px;
     }
-    .sub {
-      text-align: center;
-      color: #9aa0b5;
-      margin-bottom: 2rem;
+    .hacker-header h1 {
+      font-size: 1.7rem;
+      letter-spacing: 3px;
+      text-shadow: 0 0 5px #0f0;
+      word-break: break-word;
     }
-    .status-card {
-      background: rgba(22, 26, 40, 0.8);
-      backdrop-filter: blur(10px);
-      border-radius: 24px;
-      padding: 0.8rem 1.5rem;
+    .status-bar {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-bottom: 2rem;
-      border: 1px solid rgba(212, 175, 122, 0.3);
+      font-size: 0.75rem;
+      margin-top: 8px;
+      background: #0a0f0a;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border-left: 4px solid #0f0;
     }
-    .led {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: #ff4444;
-      box-shadow: 0 0 8px #ff4444;
-      display: inline-block;
-      margin-left: 8px;
-    }
-    .led.connected {
-      background: #2ecc71;
-      box-shadow: 0 0 12px #2ecc71;
-    }
+
     .card {
-      background: rgba(16, 18, 28, 0.85);
-      backdrop-filter: blur(8px);
-      border-radius: 28px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      border: 1px solid rgba(212, 175, 122, 0.25);
+      background: rgba(0, 20, 0, 0.75);
+      backdrop-filter: blur(2px);
+      border: 1px solid #0f0;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.2rem;
+      box-shadow: 0 0 12px rgba(0,255,0,0.2);
+      transition: 0.2s;
+    }
+    .card:hover {
+      border-color: #0f0;
+      box-shadow: 0 0 18px rgba(0,255,0,0.4);
     }
     .card h3 {
-      color: #e8d5a3;
-      margin-bottom: 1rem;
-      border-right: 3px solid #d4af7a;
-      padding-right: 12px;
+      color: #0f0;
+      border-left: 3px solid #0f0;
+      padding-left: 10px;
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
     }
-    .form-group {
-      margin-bottom: 1rem;
+
+    button {
+      background: #030603;
+      border: 1px solid #0f0;
+      color: #0f0;
+      padding: 6px 14px;
+      font-family: monospace;
+      font-weight: bold;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-radius: 20px;
+      margin: 4px;
     }
-    label {
-      display: block;
+    button:hover {
+      background: #0f0;
+      color: #030603;
+      box-shadow: 0 0 8px #0f0;
+      transform: scale(0.98);
+    }
+    input, textarea {
+      background: #030603;
+      border: 1px solid #0f0;
+      color: #0f0;
+      padding: 8px 12px;
+      font-family: monospace;
       font-size: 0.85rem;
-      margin-bottom: 6px;
-      color: #b9c0d9;
-    }
-    input, button, .color-input, textarea {
-      background: #0b0d14;
-      border: 1px solid #4a4f6e;
-      border-radius: 40px;
-      padding: 10px 16px;
-      color: white;
-      font-size: 0.9rem;
+      border-radius: 20px;
       width: 100%;
       outline: none;
     }
-    textarea {
-      border-radius: 16px;
-      font-family: monospace;
-      direction: ltr;
-      resize: vertical;
-    }
     input:focus, textarea:focus {
-      border-color: #d4af7a;
+      border-color: #0f0;
+      box-shadow: 0 0 6px #0f0;
     }
-    button {
-      background: linear-gradient(135deg, #2a2e44, #1b1e2e);
-      cursor: pointer;
-      transition: 0.2s;
-      width: auto;
-      margin-top: 8px;
-      font-weight: bold;
-    }
-    button:hover {
-      background: linear-gradient(135deg, #3d4160, #252a42);
-      border-color: #d4af7a;
-      transform: scale(0.98);
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, #6f5b3a, #c8a96e);
-      color: #13161f;
-      font-weight: bold;
-    }
+
     .flex-btns {
       display: flex;
-      gap: 12px;
       flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
     }
     .color-row {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       align-items: center;
     }
-    .color-row input[type="color"] {
-      width: 60px;
-      height: 50px;
-      padding: 4px;
-      border-radius: 16px;
+    input[type="color"] {
+      width: 50px;
+      height: 40px;
     }
+
     .log {
-      background: #05070f;
-      border-radius: 20px;
-      padding: 1rem;
-      font-family: monospace;
-      font-size: 0.75rem;
-      max-height: 150px;
+      background: #030603;
+      border: 1px solid #0f0;
+      border-radius: 10px;
+      padding: 12px;
+      height: 180px;
       overflow-y: auto;
-      margin-top: 1rem;
+      font-family: monospace;
+      font-size: 0.7rem;
+      direction: ltr;
     }
     .log-entry {
-      border-bottom: 1px solid #2a2e44;
-      padding: 5px 0;
+      border-bottom: 1px dotted #0f0;
+      padding: 4px 0;
+      color: #0f0;
     }
+
+    .led {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #f00;
+      box-shadow: 0 0 6px #f00;
+      margin-right: 8px;
+    }
+    .led.connected {
+      background: #0f0;
+      box-shadow: 0 0 8px #0f0;
+    }
+
     footer {
       text-align: center;
-      margin-top: 2rem;
-      font-size: 0.7rem;
-      opacity: 0.5;
+      font-size: 0.65rem;
+      margin-top: 25px;
+      opacity: 0.6;
     }
   </style>
 </head>
 <body>
 <div class="container">
-  <h1>🎮 لوحة التحكم عن بُعد</h1>
-  <div class="sub">إرسال أوامر فورية إلى موقع "مُصنِّف الأفعال" عبر WebSocket</div>
-
-  <div class="status-card">
-    <div><span class="led" id="led"></span> <span id="connStatus">جاري الاتصال...</span></div>
-    <div>🔌 wss://hack-n1zm.onrender.com</div>
+  <div class="hacker-header">
+    <h1>▶ ROOT ACCESS // TARGET: VERB CLASSIFIER ◀</h1>
+    <div class="status-bar">
+      <span>🔗 SESSION: <span id="sessionId">0x7F3A</span></span>
+      <span>🛡️ FIREWALL: BYPASSED</span>
+      <span>🎯 TARGET IP: 192.168.1.47</span>
+    </div>
   </div>
 
-  <!-- التحكم بالخلفية -->
+  <!-- حالة الاتصال -->
   <div class="card">
-    <h3>🎨 تغيير لون خلفية الصفحة</h3>
+    <div style="display: flex; justify-content: space-between;">
+      <div><span class="led" id="led"></span> <span id="connStatus">[ INITIALIZING... ]</span></div>
+      <div style="font-size:0.7rem;">🔌 WEBSOCKET: wss://hack-n1zm.onrender.com</div>
+    </div>
+  </div>
+
+  <!-- تغيير الخلفية -->
+  <div class="card">
+    <h3>> BACKGROUND_INJECT</h3>
     <div class="color-row">
       <input type="color" id="bgColorPicker" value="#0c0c14">
-      <button id="applyBgColorBtn">تطبيق اللون</button>
+      <button id="applyBgColorBtn">APPLY COLOR</button>
     </div>
-    <div class="flex-btns" style="margin-top: 12px;">
-      <button id="bgGoldBtn">ذهبي (#c8a96e)</button>
-      <button id="bgDarkBtn">داكن (#0c0c14)</button>
-      <button id="bgTealBtn">فيروزي (#4a9eb5)</button>
+    <div class="flex-btns">
+      <button id="bgGoldBtn">GOLD (#c8a96e)</button>
+      <button id="bgDarkBtn">DARK (#0c0c14)</button>
+      <button id="bgTealBtn">TEAL (#4a9eb5)</button>
     </div>
   </div>
 
-  <!-- التحكم بـ h1 -->
+  <!-- التحكم بـ H1 -->
   <div class="card">
-    <h3>📝 كتابة عنوان (h1) أو تعديله</h3>
-    <div class="form-group">
-      <label>نص العنوان الجديد:</label>
-      <input type="text" id="h1Text" placeholder="مثال: تم الاختراق بنجاح">
+    <h3>> OVERRIDE_HEADER</h3>
+    <input type="text" id="h1Text" placeholder="[ new_header_text ]" value="> SYSTEM COMPROMISED">
+    <div class="flex-btns">
+      <button id="updateH1Btn">INJECT H1</button>
+      <button id="removeH1Btn">REMOVE H1</button>
     </div>
-    <button id="updateH1Btn" class="btn-primary">إنشاء / تحديث h1</button>
-    <button id="removeH1Btn" style="margin-top: 8px;">❌ إزالة h1</button>
   </div>
 
   <!-- التحكم بحقل الإدخال (كتابة حرف بحرف مع الصوت) -->
   <div class="card">
-    <h3>⌨️ التحكم بحقل الإدخال (كتابة حرف بحرف مع الصوت)</h3>
-    <div class="form-group">
-      <label>اكتب حرفاً أو رقماً (سيظهر فوراً مع الصوت إن كان رقماً):</label>
-      <input type="text" id="singleCharInput" placeholder="مثال: 1" maxlength="1">
-      <button id="sendCharBtn" style="margin-top: 8px;">➕ إرسال الحرف</button>
+    <h3>> KEYSTROKE_SPOOFER</h3>
+    <div class="flex-btns" style="justify-content: space-between;">
+      <input type="text" id="singleCharInput" placeholder="CHAR" maxlength="1" style="width: 80px;">
+      <button id="sendCharBtn">SEND CHAR</button>
+      <button id="clearInputBtn">CLEAR FIELD</button>
     </div>
     <div class="flex-btns">
-      <button id="clearInputBtn">🧹 مسح الحقل بالكامل</button>
-      <button id="clickCheckBtn" class="btn-primary">🔍 الضغط على زر الفحص (صوت القليتش)</button>
+      <input type="text" id="fullTextInput" placeholder="full text (no sound)" style="flex:2">
+      <button id="applyFullTextBtn">SET TEXT</button>
     </div>
-    <div class="form-group" style="margin-top: 12px;">
-      <label>نص كامل للحقل (بدون تأثير الصوت):</label>
-      <input type="text" id="fullTextInput" placeholder="مثال: كتب">
-      <button id="applyFullTextBtn" style="margin-top: 6px;">تطبيق النص</button>
-    </div>
+    <button id="clickCheckBtn" style="background:#0f0; color:#030603; width:100%; margin-top:8px;">🚀 EXECUTE CLASSIFICATION (GLITCH SOUND)</button>
   </div>
 
-  <!-- إرسال كود مخصص -->
+  <!-- 💀 قسم التأثيرات الهاكر المتطورة -->
   <div class="card">
-    <h3>⚡ كود JavaScript مخصص (متقدم)</h3>
-    <textarea id="customCode" rows="3" placeholder='مثال: document.querySelector(".app-title").style.color = "red";'></textarea>
-    <button id="sendCustomBtn" style="margin-top: 10px;">🚀 إرسال وتنفيذ</button>
+    <h3>> 💀 HACKER_ULTIMATE_EFFECTS</h3>
+    <div class="flex-btns">
+      <button id="hackedMsgBtn">⚠️ HACKED OVERLAY</button>
+      <button id="glitchBtn">🌀 GLITCH FLASH</button>
+      <button id="alarmBtn">🔊 ALARM SOUND</button>
+      <button id="fakeProgressBtn">📊 FAKE PROGRESS</button>
+      <button id="dangerFaviconBtn">⚠️ CHANGE FAVICON</button>
+      <button id="disableAllBtn">⛔ DISABLE SITE</button>
+      <button id="enableAllBtn">✅ ENABLE SITE</button>
+      <button id="shakeSiteBtn">📳 SHAKE PAGE</button>
+    </div>
+    <div class="flex-btns">
+      <input type="text" id="hackerCustomMsg" placeholder="Custom Hacked Message">
+      <button id="sendCustomHackMsg">📢 SHOW ALERT</button>
+    </div>
   </div>
 
-  <div class="log" id="logArea">
-    <div class="log-entry">📡 جاهز. سيتم إرسال الأوامر إلى WebSocket.</div>
+  <!-- كود مخصص -->
+  <div class="card">
+    <h3>> CUSTOM_JS_TERMINAL</h3>
+    <textarea id="customCode" rows="2" placeholder="JS code... e.g. alert('owned')"></textarea>
+    <button id="sendCustomBtn">EXECUTE CODE</button>
   </div>
-  <footer>⚠️ ملاحظة: تأكد من تشغيل خادم WebSocket أولاً، ثم افتح موقع التصنيف المعدل وموقع التحكم معاً.</footer>
+
+  <!-- سجل العمليات -->
+  <div class="card">
+    <h3>> ATTACK_LOG</h3>
+    <div class="log" id="logArea">
+      <div class="log-entry">[>] SYSTEM READY. WEBSOCKET TARGET ACQUIRED.</div>
+    </div>
+  </div>
+  <footer>⚠️ ETHICAL HACKING SIMULATION // CONTROLLER FOR VERB CLASSIFIER</footer>
 </div>
 
 <script>
-  // إعداد WebSocket - الرابط المقدم
+  // ---------- CONFIGURATION ----------
   const SOCKET_URL = 'wss://hack-n1zm.onrender.com';
   let socket = null;
   let reconnectAttempts = 0;
@@ -237,10 +279,13 @@
   const connStatusSpan = document.getElementById('connStatus');
   const logDiv = document.getElementById('logArea');
 
+  // إعداد جلسة عشوائية
+  document.getElementById('sessionId').innerText = '0x' + Math.floor(Math.random()*10000).toString(16).toUpperCase();
+
   function addLog(message, isError = false) {
     const entry = document.createElement('div');
     entry.className = 'log-entry';
-    entry.style.color = isError ? '#ffaa88' : '#b9c0d9';
+    entry.style.color = isError ? '#ff8888' : '#0f0';
     const time = new Date().toLocaleTimeString();
     entry.innerHTML = `[${time}] ${message}`;
     logDiv.appendChild(entry);
@@ -251,85 +296,190 @@
   function updateConnectionStatus(connected) {
     if (connected) {
       led.classList.add('connected');
-      connStatusSpan.textContent = '✅ متصل بالسيرفر';
-      addLog('✅ WebSocket متصل. يمكنك إرسال الأوامر.');
+      connStatusSpan.textContent = '[ CONNECTED ]';
+      addLog('> WEBSOCKET ESTABLISHED. READY TO DEPLOY COMMANDS.');
     } else {
       led.classList.remove('connected');
-      connStatusSpan.textContent = '❌ غير متصل — جاري إعادة المحاولة...';
-      addLog('⚠️ انقطع الاتصال، محاولة إعادة الاتصال...', true);
+      connStatusSpan.textContent = '[ DISCONNECTED ]';
+      addLog('> CONNECTION LOST. ATTEMPTING RECONNECT...', true);
     }
   }
 
   function sendCommand(command) {
     if (!socket || socket.readyState !== WebSocket.OPEN) {
-      addLog('❌ لا يمكن الإرسال: WebSocket غير متصل.', true);
+      addLog('! ERROR: WEBSOCKET NOT ACTIVE', true);
       return false;
     }
     socket.send(command);
-    addLog(`📤 إرسال: ${command.substring(0, 150)}${command.length > 150 ? '…' : ''}`);
+    addLog(`> CMD SENT: ${command.substring(0, 120)}${command.length > 120 ? '…' : ''}`);
     return true;
   }
 
-  // دوال بناء الأوامر
-  const commands = {
-    setBackgroundColor: (color) => `document.body.style.backgroundColor = "${color}"; document.body.style.backgroundImage = "none";`,
+  // أوامر الوظائف الأساسية (تتطلب دوال مساعدة في الموقع الأصلي)
+  const basicCommands = {
+    setBg: (color) => `document.body.style.backgroundColor = "${color}"; document.body.style.backgroundImage = "none";`,
     setH1: (text) => `
-      let oldH1 = document.querySelector('.app-title');
-      if (oldH1) {
-        oldH1.innerHTML = "${text.replace(/"/g, '\\"')}";
-      } else {
-        let newH1 = document.createElement('h1');
-        newH1.className = 'app-title';
-        newH1.innerHTML = "${text.replace(/"/g, '\\"')}";
-        document.querySelector('.header').prepend(newH1);
+      let old = document.querySelector('.app-title');
+      if (old) old.innerHTML = "${text.replace(/"/g, '\\"')}";
+      else {
+        let h = document.createElement('h1');
+        h.className = 'app-title';
+        h.innerHTML = "${text.replace(/"/g, '\\"')}";
+        document.querySelector('.header').prepend(h);
       }
     `,
-    removeH1: `let h1 = document.querySelector('.app-title'); if(h1) h1.remove();`,
-    // دوال خاصة بحقل الإدخال والصوت (يجب أن تكون موجودة في الموقع الأصلي)
-    addCharacterAndPlay: (char) => `addCharacterAndPlay("${char.replace(/"/g, '\\"')}");`,
-    clearInputField: `clearInputField();`,
-    setInputValueFull: (text) => `setInputValueFull("${text.replace(/"/g, '\\"')}");`,
+    removeH1: `let h = document.querySelector('.app-title'); if(h) h.remove();`,
+    addChar: (c) => `addCharacterAndPlay("${c.replace(/"/g, '\\"')}");`,
+    clearInput: `clearInputField();`,
+    setFull: (val) => `setInputValueFull("${val.replace(/"/g, '\\"')}");`,
     clickCheck: `document.getElementById('check-btn').click();`,
   };
 
-  // ربط الأزرار
-  document.getElementById('applyBgColorBtn').onclick = () => {
-    const color = document.getElementById('bgColorPicker').value;
-    sendCommand(commands.setBackgroundColor(color));
+  // أوامر تأثيرات الهاكر (تعمل إذا كانت الدوال موجودة في الموقع الأصلي)
+  const hackerCommands = {
+    hackedOverlay: `
+      let ov = document.getElementById('hacked-overlay');
+      if(ov) ov.remove();
+      ov = document.createElement('div');
+      ov.id = 'hacked-overlay';
+      ov.style.position = 'fixed';
+      ov.style.top = '0'; ov.style.left = '0';
+      ov.style.width = '100vw'; ov.style.height = '100vh';
+      ov.style.backgroundColor = 'black';
+      ov.style.color = '#f00';
+      ov.style.fontSize = '48px';
+      ov.style.fontFamily = 'monospace';
+      ov.style.display = 'flex';
+      ov.style.alignItems = 'center';
+      ov.style.justifyContent = 'center';
+      ov.style.zIndex = '100000';
+      ov.style.flexDirection = 'column';
+      ov.innerHTML = '<div style="text-align:center">⚠️ SYSTEM HACKED ⚠️<br><span style="font-size:24px;">You have been pwned</span><br><button id="closeOverlayBtn" style="margin-top:20px; padding:10px;">Close</button></div>';
+      document.body.appendChild(ov);
+      document.getElementById('closeOverlayBtn').onclick = () => ov.remove();
+    `,
+    glitchFlash: `
+      let flash = document.createElement('div');
+      flash.style.position = 'fixed'; flash.style.top = 0; flash.style.left = 0;
+      flash.style.width = '100vw'; flash.style.height = '100vh';
+      flash.style.backgroundColor = 'white';
+      flash.style.zIndex = '99999';
+      flash.style.opacity = '0.8';
+      document.body.appendChild(flash);
+      setTimeout(() => flash.remove(), 150);
+      for(let i=0;i<5;i++) setTimeout(()=> document.body.style.filter = 'invert(1)', i*100);
+      setTimeout(()=> document.body.style.filter = '', 600);
+    `,
+    alarmSound: `
+      let ctx = new (window.AudioContext || window.webkitAudioContext)();
+      let osc = ctx.createOscillator();
+      let gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.value = 880;
+      gain.gain.value = 0.5;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 1.5);
+      osc.stop(ctx.currentTime + 1.5);
+    `,
+    fakeProgress: `
+      let progressDiv = document.createElement('div');
+      progressDiv.id = 'fake-progress';
+      progressDiv.style.position = 'fixed';
+      progressDiv.style.bottom = '20px';
+      progressDiv.style.left = '20px';
+      progressDiv.style.width = '300px';
+      progressDiv.style.backgroundColor = '#333';
+      progressDiv.style.border = '1px solid #0f0';
+      progressDiv.style.padding = '5px';
+      progressDiv.style.color = '#0f0';
+      progressDiv.style.fontFamily = 'monospace';
+      progressDiv.style.zIndex = 99999;
+      progressDiv.innerHTML = 'Loading malware... <div style="background:#0f0; width:0%; height:5px;"></div>';
+      document.body.appendChild(progressDiv);
+      let width = 0;
+      const interval = setInterval(() => {
+        width += 5;
+        if(progressDiv.querySelector('div')) progressDiv.querySelector('div').style.width = width + '%';
+        if (width >= 100) {
+          clearInterval(interval);
+          progressDiv.innerHTML = '✔️ Malware loaded. System compromised.';
+          setTimeout(() => progressDiv.remove(), 2000);
+        }
+      }, 200);
+    `,
+    dangerFavicon: `
+      let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'shortcut icon';
+      link.href = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⚠️</text></svg>';
+      document.head.appendChild(link);
+    `,
+    disableInteractions: `
+      document.getElementById('verb-input').disabled = true;
+      document.getElementById('check-btn').disabled = true;
+    `,
+    enableInteractions: `
+      document.getElementById('verb-input').disabled = false;
+      document.getElementById('check-btn').disabled = false;
+    `,
+    shakePage: `
+      document.body.style.animation = 'shake 0.5s ease 2';
+      setTimeout(() => document.body.style.animation = '', 1000);
+    `,
+    customAlert: (msg) => `alert("${msg.replace(/"/g, '\\"')}");`,
   };
-  document.getElementById('bgGoldBtn').onclick = () => sendCommand(commands.setBackgroundColor('#c8a96e'));
-  document.getElementById('bgDarkBtn').onclick = () => sendCommand(commands.setBackgroundColor('#0c0c14'));
-  document.getElementById('bgTealBtn').onclick = () => sendCommand(commands.setBackgroundColor('#4a9eb5'));
+
+  // ربط الأزرار الأساسية
+  document.getElementById('applyBgColorBtn').onclick = () => sendCommand(basicCommands.setBg(document.getElementById('bgColorPicker').value));
+  document.getElementById('bgGoldBtn').onclick = () => sendCommand(basicCommands.setBg('#c8a96e'));
+  document.getElementById('bgDarkBtn').onclick = () => sendCommand(basicCommands.setBg('#0c0c14'));
+  document.getElementById('bgTealBtn').onclick = () => sendCommand(basicCommands.setBg('#4a9eb5'));
 
   document.getElementById('updateH1Btn').onclick = () => {
-    const text = document.getElementById('h1Text').value.trim();
-    if (!text) { addLog('⚠️ أدخل نص العنوان أولاً', true); return; }
-    sendCommand(commands.setH1(text));
+    let txt = document.getElementById('h1Text').value;
+    if (!txt.trim()) txt = "> HACKED";
+    sendCommand(basicCommands.setH1(txt));
   };
-  document.getElementById('removeH1Btn').onclick = () => sendCommand(commands.removeH1);
+  document.getElementById('removeH1Btn').onclick = () => sendCommand(basicCommands.removeH1);
 
-  // أزرار حقل الإدخال
   document.getElementById('sendCharBtn').onclick = () => {
-    const char = document.getElementById('singleCharInput').value.trim();
-    if (!char) { addLog('⚠️ أدخل حرفاً واحداً', true); return; }
-    sendCommand(commands.addCharacterAndPlay(char));
+    let ch = document.getElementById('singleCharInput').value.trim();
+    if (!ch) { addLog('! ENTER A CHARACTER', true); return; }
+    sendCommand(basicCommands.addChar(ch));
     document.getElementById('singleCharInput').value = '';
   };
-  document.getElementById('clearInputBtn').onclick = () => sendCommand(commands.clearInputField);
+  document.getElementById('clearInputBtn').onclick = () => sendCommand(basicCommands.clearInput);
   document.getElementById('applyFullTextBtn').onclick = () => {
-    const text = document.getElementById('fullTextInput').value;
-    sendCommand(commands.setInputValueFull(text));
+    let val = document.getElementById('fullTextInput').value;
+    sendCommand(basicCommands.setFull(val));
   };
-  document.getElementById('clickCheckBtn').onclick = () => sendCommand(commands.clickCheck);
+  document.getElementById('clickCheckBtn').onclick = () => sendCommand(basicCommands.clickCheck);
+
+  // ربط أزرار التأثيرات الهاكر
+  document.getElementById('hackedMsgBtn').onclick = () => sendCommand(hackerCommands.hackedOverlay);
+  document.getElementById('glitchBtn').onclick = () => sendCommand(hackerCommands.glitchFlash);
+  document.getElementById('alarmBtn').onclick = () => sendCommand(hackerCommands.alarmSound);
+  document.getElementById('fakeProgressBtn').onclick = () => sendCommand(hackerCommands.fakeProgress);
+  document.getElementById('dangerFaviconBtn').onclick = () => sendCommand(hackerCommands.dangerFavicon);
+  document.getElementById('disableAllBtn').onclick = () => sendCommand(hackerCommands.disableInteractions);
+  document.getElementById('enableAllBtn').onclick = () => sendCommand(hackerCommands.enableInteractions);
+  document.getElementById('shakeSiteBtn').onclick = () => sendCommand(hackerCommands.shakePage);
+  document.getElementById('sendCustomHackMsg').onclick = () => {
+    let msg = document.getElementById('hackerCustomMsg').value;
+    if (!msg.trim()) msg = "HACKED BY CONTROLLER";
+    sendCommand(hackerCommands.customAlert(msg));
+  };
 
   // كود مخصص
   document.getElementById('sendCustomBtn').onclick = () => {
-    const code = document.getElementById('customCode').value.trim();
-    if (!code) { addLog('⚠️ اكتب كود JavaScript أولاً', true); return; }
+    let code = document.getElementById('customCode').value.trim();
+    if (!code) { addLog('! ENTER JS CODE', true); return; }
     sendCommand(code);
   };
 
-  // WebSocket مع إعادة الاتصال
+  // WebSocket مع إعادة اتصال
   function connectWebSocket() {
     try {
       socket = new WebSocket(SOCKET_URL);
@@ -337,7 +487,7 @@
         updateConnectionStatus(true);
         reconnectAttempts = 0;
       };
-      socket.onerror = (err) => { console.error(err); addLog('⚠️ خطأ في WebSocket', true); };
+      socket.onerror = (err) => { console.error(err); addLog('! WEBSOCKET ERROR', true); };
       socket.onclose = () => {
         updateConnectionStatus(false);
         if (reconnectAttempts < MAX_RECONNECT) {
@@ -345,10 +495,10 @@
           const delay = 2000 * Math.min(reconnectAttempts, 5);
           setTimeout(connectWebSocket, delay);
         } else {
-          addLog('❌ فشل إعادة الاتصال. تأكد من تشغيل الخادم.', true);
+          addLog('! FAILED TO RECONNECT. CHECK SERVER.', true);
         }
       };
-    } catch(e) { addLog(`❌ فشل إنشاء WebSocket: ${e.message}`, true); }
+    } catch(e) { addLog(`! SOCKET INIT ERROR: ${e.message}`, true); }
   }
 
   connectWebSocket();
