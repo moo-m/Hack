@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎮 لوحة التحكم عن بُعد – WebSocket Commander</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: linear-gradient(145deg, #1a1e2c 0%, #0b0d17 100%);
+      font-family: 'Segoe UI', 'Cairo', system-ui, sans-serif;
+      padding: 2rem;
+      min-height: 100vh;
+      color: #f0f0f0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 2rem;
+      background: linear-gradient(135deg, #d4af7a, #f5e7c8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .sub {
+      text-align: center;
+      color: #9aa0b5;
+      margin-bottom: 2rem;
+    }
+    .status-card {
+      background: rgba(22, 26, 40, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(212, 175, 122, 0.3);
+    }
+    .led {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #ff4444;
+      box-shadow: 0 0 8px #ff4444;
+      display: inline-block;
+      margin-left: 8px;
+    }
+    .led.connected {
+      background: #2ecc71;
+      box-shadow: 0 0 12px #2ecc71;
+    }
+    .card {
+      background: rgba(16, 18, 28, 0.85);
+      backdrop-filter: blur(8px);
+      border-radius: 28px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(212, 175, 122, 0.25);
+    }
+    .card h3 {
+      color: #e8d5a3;
+      margin-bottom: 1rem;
+      border-right: 3px solid #d4af7a;
+      padding-right: 12px;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      color: #b9c0d9;
+    }
+    input, button, .color-input {
+      background: #0b0d14;
+      border: 1px solid #4a4f6e;
+      border-radius: 40px;
+      padding: 10px 16px;
+      color: white;
+      font-size: 0.9rem;
+      width: 100%;
+      outline: none;
+    }
+    input:focus {
+      border-color: #d4af7a;
+    }
+    button {
+      background: linear-gradient(135deg, #2a2e44, #1b1e2e);
+      cursor: pointer;
+      transition: 0.2s;
+      width: auto;
+      margin-top: 8px;
+      font-weight: bold;
+    }
+    button:hover {
+      background: linear-gradient(135deg, #3d4160, #252a42);
+      border-color: #d4af7a;
+      transform: scale(0.98);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #6f5b3a, #c8a96e);
+      color: #13161f;
+      font-weight: bold;
+    }
+    .flex-btns {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .color-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .color-row input[type="color"] {
+      width: 60px;
+      height: 50px;
+      padding: 4px;
+      border-radius: 16px;
+    }
+    .log {
+      background: #05070f;
+      border-radius: 20px;
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 0.75rem;
+      max-height: 150px;
+      overflow-y: auto;
+      margin-top: 1rem;
+    }
+    .log-entry {
+      border-bottom: 1px solid #2a2e44;
+      padding: 5px 0;
+    }
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.7rem;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>🎮 لوحة التحكم عن بُعد</h1>
+  <div class="sub">إرسال أوامر فورية إلى موقع "مُصنِّف الأفعال" عبر WebSocket</div>
+
+  <div class="status-card">
+    <div><span class="led" id="led"></span> <span id="connStatus">جاري الاتصال...</span></div>
+    <div>🔌 ws://localhost:8080</div>
+  </div>
+
+  <!-- التحكم بالخلفية -->
+  <div class="card">
+    <h3>🎨 تغيير لون خلفية الصفحة</h3>
+    <div class="color-row">
+      <input type="color" id="bgColorPicker" value="#0c0c14">
+      <button id="applyBgColorBtn">تطبيق اللون</button>
+    </div>
+    <div class="flex-btns" style="margin-top: 12px;">
+      <button id="bgGoldBtn">ذهبي (#c8a96e)</button>
+      <button id="bgDarkBtn">داكن (#0c0c14)</button>
+      <button id="bgTealBtn">فيروزي (#4a9eb5)</button>
+    </div>
+  </div>
+
+  <!-- التحكم بـ h1 (إنشاء أو تعديل) -->
+  <div class="card">
+    <h3>📝 كتابة عنوان (h1) أو تعديله</h3>
+    <div class="form-group">
+      <label>نص العنوان الجديد:</label>
+      <input type="text" id="h1Text" placeholder="مثال: تم الاختراق بنجاح">
+    </div>
+    <button id="updateH1Btn" class="btn-primary">إنشاء / تحديث h1</button>
+    <button id="removeH1Btn" style="margin-top: 8px;">❌ إزالة h1</button>
+  </div>
+
+  <!-- التحكم بحقل الإدخال والزر -->
+  <div class="card">
+    <h3>⌨️ التحكم بحقل الإدخال وزر الفحص</h3>
+    <div class="form-group">
+      <label>النص المراد كتابته في حقل الإدخال:</label>
+      <input type="text" id="inputValue" placeholder="مثال: كتب">
+    </div>
+    <div class="flex-btns">
+      <button id="setInputBtn">✍️ تعيين النص</button>
+      <button id="clearInputBtn">🧹 مسح الحقل</button>
+      <button id="clickCheckBtn" class="btn-primary">🔍 الضغط على زر الفحص</button>
+    </div>
+  </div>
+
+  <!-- إرسال كود مخصص -->
+  <div class="card">
+    <h3>⚡ كود JavaScript مخصص (متقدم)</h3>
+    <textarea id="customCode" rows="3" style="width:100%; background:#0b0d14; border-radius:16px; padding:10px; font-family:monospace; direction:ltr;" placeholder='مثال: document.querySelector(".app-title").style.color = "red";'></textarea>
+    <button id="sendCustomBtn" style="margin-top: 10px;">🚀 إرسال وتنفيذ</button>
+  </div>
+
+  <div class="log" id="logArea">
+    <div class="log-entry">📡 جاهز. سيتم إرسال الأوامر إلى WebSocket.</div>
+  </div>
+  <footer>⚠️ ملاحظة: تأكد من تشغيل خادم WebSocket (node server.js) أولاً، ثم افتح موقع التصنيف وموقع التحكم معاً.</footer>
+</div>
+
+<script>
+  // إعداد WebSocket
+  const SOCKET_URL = 'ws://localhost:8080';
+  let socket = null;
+  let reconnectAttempts = 0;
+  const MAX_RECONNECT = 10;
+
+  const led = document.getElementById('led');
+  const connStatusSpan = document.getElementById('connStatus');
+  const logDiv = document.getElementById('logArea');
+
+  function addLog(message, isError = false) {
+    const entry = document.createElement('div');
+    entry.className = 'log-entry';
+    entry.style.color = isError ? '#ffaa88' : '#b9c0d9';
+    const time = new Date().toLocaleTimeString();
+    entry.innerHTML = `[${time}] ${message}`;
+    logDiv.appendChild(entry);
+    entry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (logDiv.children.length > 50) logDiv.removeChild(logDiv.firstChild);
+  }
+
+  function updateConnectionStatus(connected) {
+    if (connected) {
+      led.classList.add('connected');
+      connStatusSpan.textContent = '✅ متصل بالسيرفر';
+      addLog('✅ WebSocket متصل. يمكنك إرسال الأوامر.');
+    } else {
+      led.classList.remove('connected');
+      connStatusSpan.textContent = '❌ غير متصل — جاري إعادة المحاولة...';
+      addLog('⚠️ انقطع الاتصال، محاولة إعادة الاتصال...', true);
+    }
+  }
+
+  function sendCommand(command) {
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+      addLog('❌ لا يمكن الإرسال: WebSocket غير متصل.', true);
+      return false;
+    }
+    socket.send(command);
+    addLog(`📤 إرسال: ${command.substring(0, 150)}${command.length > 150 ? '…' : ''}`);
+    return true;
+  }
+
+  // دوال بناء الأوامر
+  const commands = {
+    setBackgroundColor: (color) => `document.body.style.backgroundColor = "${color}"; document.body.style.backgroundImage = "none";`,
+    setH1: (text) => {
+      // يبحث عن h1 داخل .app-title أو ينشئ واحداً جديداً
+      return `
+        let oldH1 = document.querySelector('.app-title');
+        if (oldH1) {
+          oldH1.innerHTML = "${text.replace(/"/g, '\\"')}";
+        } else {
+          let newH1 = document.createElement('h1');
+          newH1.className = 'app-title';
+          newH1.innerHTML = "${text.replace(/"/g, '\\"')}";
+          document.querySelector('.header').prepend(newH1);
+        }
+      `;
+    },
+    removeH1: `let h1 = document.querySelector('.app-title'); if(h1) h1.remove();`,
+    setInputValue: (value) => `document.getElementById('verb-input').value = "${value.replace(/"/g, '\\"')}";`,
+    clearInput: `document.getElementById('verb-input').value = '';`,
+    clickCheck: `document.getElementById('check-btn').click();`,
+  };
+
+  // ربط الأزرار
+  document.getElementById('applyBgColorBtn').onclick = () => {
+    const color = document.getElementById('bgColorPicker').value;
+    sendCommand(commands.setBackgroundColor(color));
+  };
+  document.getElementById('bgGoldBtn').onclick = () => sendCommand(commands.setBackgroundColor('#c8a96e'));
+  document.getElementById('bgDarkBtn').onclick = () => sendCommand(commands.setBackgroundColor('#0c0c14'));
+  document.getElementById('bgTealBtn').onclick = () => sendCommand(commands.setBackgroundColor('#4a9eb5'));
+
+  document.getElementById('updateH1Btn').onclick = () => {
+    const text = document.getElementById('h1Text').value.trim();
+    if (!text) { addLog('⚠️ أدخل نص العنوان أولاً', true); return; }
+    sendCommand(commands.setH1(text));
+  };
+  document.getElementById('removeH1Btn').onclick = () => sendCommand(commands.removeH1);
+
+  document.getElementById('setInputBtn').onclick = () => {
+    const val = document.getElementById('inputValue').value;
+    sendCommand(commands.setInputValue(val));
+  };
+  document.getElementById('clearInputBtn').onclick = () => sendCommand(commands.clearInput);
+  document.getElementById('clickCheckBtn').onclick = () => sendCommand(commands.clickCheck);
+
+  document.getElementById('sendCustomBtn').onclick = () => {
+    const code = document.getElementById('customCode').value.trim();
+    if (!code) { addLog('⚠️ اكتب كود JavaScript أولاً', true); return; }
+    sendCommand(code);
+  };
+
+  // WebSocket مع إعادة الاتصال
+  function connectWebSocket() {
+    try {
+      socket = new WebSocket(SOCKET_URL);
+      socket.onopen = () => {
+        updateConnectionStatus(true);
+        reconnectAttempts = 0;
+      };
+      socket.onerror = (err) => { console.error(err); addLog('⚠️ خطأ في WebSocket', true); };
+      socket.onclose = () => {
+        updateConnectionStatus(false);
+        if (reconnectAttempts < MAX_RECONNECT) {
+          reconnectAttempts++;
+          const delay = 2000 * Math.min(reconnectAttempts, 5);
+          setTimeout(connectWebSocket, delay);
+        } else {
+          addLog('❌ فشل إعادة الاتصال. تأكد من تشغيل الخادم.', true);
+        }
+      };
+    } catch(e) { addLog(`❌ فشل إنشاء WebSocket: ${e.message}`, true); }
+  }
+
+  connectWebSocket();
+</script>
+</body>
+</html>
