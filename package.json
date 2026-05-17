@@ -1,0 +1,14 @@
+{
+  "name": "websocket-controller-backend",
+  "version": "1.0.0",
+  "description": "WebSocket server for remote control of the verb classifier site",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.14.2"
+  },
+  "author": "",
+  "license": "MIT"
+}
